@@ -16,8 +16,8 @@ int16_t ypos = 0;
 
 #define USE_LINE_BUFFER  // Enable for faster rendering
 
-#define WIFI_SSID "WHNX"
-#define WIFI_PASS "!Petricek?43xQ"
+#define WIFI_SSID "+++++++"
+#define WIFI_PASS "+++++++"
 
 
 #if defined(USE_ADAFRUIT_GFX)
