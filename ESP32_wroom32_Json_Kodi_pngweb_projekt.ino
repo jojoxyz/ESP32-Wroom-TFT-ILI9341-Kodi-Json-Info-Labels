@@ -1,6 +1,26 @@
 
 // KODI INFO PANEL LCD - ILI9341 - ESP32 Wroom32
 
+/*
+   SD not used in this projekt
+
+   SD_CS     -    5     
+   SD0 MISO  -   19
+
+ --LCD--
+ 
+   LED       -   32
+   SCK       -   18
+   SDI MOSI  -   23
+   LCD_RS    -    2
+   LCD_RST   -    4
+   LCD_CS    -   15
+
+   GND
+   VCC  3,3V
+ 
+ */
+
 #define USE_LINE_BUFFER  // Enable for faster rendering
 
 #define WIFI_SSID "++++++++++++" // Wifi Network +++++
