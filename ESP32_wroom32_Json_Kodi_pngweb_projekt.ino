@@ -26,7 +26,8 @@
 #define WIFI_SSID "++++++++++++" // Wifi Network +++++
 #define WIFI_PASS "++++++++++++" // Password +++++
 
-#if defined(USE_ADAFRUIT_GFX)   // touch, not used in this projekt, intgred in png scripts
+
+#if defined(USE_ADAFRUIT_GFX)
   #define TFT_CS  5
   #define TFT_DC  26
   #define TFT_RST 27
@@ -37,21 +38,35 @@
   TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 #endif
 
-// Include SPIFFS for PNG from web
+// Include SPIFFS
 #define FS_NO_GLOBALS
 #include <FS.h>
 #include "SPIFFS.h" // Required for ESP32 only
 
-// Client for kodi json rpc
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include "support_functions.h"
 #include <WiFi.h>
 
 
-#define BLACK      0x0000
-#define CYAN       0x022fb8
-#define DARK_CYAN  0x001a00
+#define BLACK          0x0000
+#define WHITE          0xFFFF
+#define BLUE           0x001F
+#define RED            0xF800
+#define GREEN          0x07E0
+#define CYAN           0x07FF
+#define MAGENTA        0xF81F
+#define YELLOW         0xFFE0
+#define ORANGE         0xFD20
+#define PINK           0xF81F
+
+#define GREENYELLOW    0xAFE5
+
+#define DARK_BLUE      0x021ab8
+#define DARK_RED       0x29b802
+#define DARK_GREEN     0x03E0
+#define DARK_CYAN      0x022fb8
+#define DARK_MAGENTE   0x2b814
 
 
 void setup()  //--------------------------- SETUP ------------------------------
@@ -59,7 +74,7 @@ void setup()  //--------------------------- SETUP ------------------------------
       Serial.begin(115200);
 
       tft.begin();
-      tft.invertDisplay(1);   // For China Klon
+      tft.invertDisplay(1);
       tft.setRotation(3);
       tft.fillScreen(0);
   
@@ -78,235 +93,262 @@ Serial.print(".");
 Serial.println("\n WiFi connected.\n");
     }
 
+
+
+  String filmy = "https://raw.githubusercontent.com/jojoxyz/Logo_Extra/refs/heads/main/filmy.png";
+    String hudba = "https://raw.githubusercontent.com/jojoxyz/Logo_Extra/refs/heads/main/music.png";
+      String stream = "https://raw.githubusercontent.com/jojoxyz/Logo_Extra/refs/heads/main/stream.png"; 
+
   int    pela    = 0;
-  int    pdur    = 0;
-  int    vdur    = 0;
-  int    vela    = 0;
-  int    mdur    = 0;
-  int    mela    = 0;  
-  int    bar_val = 0;
-  String Logo_tv    ;
+    int    pdur    = 0;
 
+  bool progbar = false;
+ 
+  bool bool_tv = false;
+    bool bool_fil = false; 
+      bool bool_mus = false;
+        bool bool_stre = false;
+          bool bool_rec = false;
 
-void web()  //------------------------------- WEB ------------------------------
-    {
-
-      if ((WiFi.status() == WL_CONNECTED))
+  String inRaw;
+    String inRaw0;
+    
+void loop()  //--------------------------- LOP ---------------------------------
+    { 
+//---------------------------------------- WEB bool ---------------------------------
+     if ((WiFi.status() == WL_CONNECTED))
         {
           HTTPClient http;
 
-         String addr     = ("http://192.168.0.150:8081/jsonrpc?request=");
-         String comm     = ("{%22jsonrpc%22:%222.0%22,%22method%22:%22XBMC.GetInfoLabels%22,%22params%22:{%22labels%22:[");
+         String addr0   = ("http://192.168.0.150:8081/jsonrpc?request=");
+         String comm0   = ("{%22jsonrpc%22:%222.0%22,%22method%22:%22XBMC.GetInfoBooleans%22,%22params%22:{%22booleans%22:[");
 
-         String label_1  = ("%22System.Date%22,"             );
-   //    String label_2  = ("%22VideoPlayer.ChannelName%22," );
-   //    String label_3  = ("%22VideoPlayer.Title%22,"       );          
-   //    String label_4  = ("%22VideoPlayer.Year%22,"        );          
-         String label_5  = ("%22PVR.EpgEventDuration(hh:mm:ss)%22,"    );       
-         String label_6  = ("%22PVR.EpgEventElapsedTime(hh:mm:ss)%22," ); // = "VideoPlayer.Time" and "MusicPlayer.Time"
-   //    String label_7  = ("%22PVR.EpgEventFinishTime%22,"  );          
-         String label_8  = ("%22VideoPlayer.Cover%22,"       );
-         String label_9  = ("%22VideoPlayer.Time%22,"        );
-         String label_10 = ("%22MusicPlayer.Duration%22"     );  // !!! ,
+         String bool_1  = ("%22Pvr.IsPlayingTv%22," );            // ak sa prehrava TV        = true
+         String bool_2  = ("%22Player.HasAudio%22," );            // ak sa prehrava audio     = true
+         String bool_3  = ("%22VideoPlayer.Content(movies)%22," ); // ak sa prehrava film      = true    
+         String bool_4  = ("%22Player.IsInternetStream%22," );     // ak je internetovy stream = true
+         String bool_5  = ("%22Pvr.IsRecordingTV%22" );           // ak sa nahrava tv         = true
 
-         String id       = ("]},%22id%22:5}"                 );
+
+         String id0     = ("]},%22id%22:1}" );
           
-         String link     = addr + comm + label_1 + label_5 + label_6 + label_8 + label_9 + label_10 + id ;
+         String link0   = addr0 + comm0 + bool_1 + bool_2 + bool_3 + bool_4 + bool_5 + id0 ;
 
-         http.begin(link); // set full server json rpc address 
+         http.begin(link0);
           
-         int httpCode = http.GET();
-         String inRaw = http.getString();
-
-
-//---- Deserialization + Filter ----  https://arduinojson.org/v6/assistant/#/step1  ----
+         int httpCode0 = http.GET();
+         inRaw0 = http.getString();
+         
+//Serial.println(inRaw0);
 
          StaticJsonDocument<0> filter;
          filter.set(true);
 
-         StaticJsonDocument<512> doc;
+         StaticJsonDocument<192> doc;
 
-         DeserializationError error = deserializeJson(doc, inRaw, DeserializationOption::Filter(filter));
+         DeserializationError error = deserializeJson(doc, inRaw0, DeserializationOption::Filter(filter));
 
          if (error)
            {
-Serial.print("deserializeJson() failed: ");
-Serial.println(error.c_str());
+//Serial.print("deserializeJson() failed: ");
+//Serial.println(error.c_str());
              return;
            }
 
          JsonObject result = doc["result"];
-
-         String res_PVR_EpgEvDur     = result["PVR.EpgEventDuration(hh:mm:ss)"];
-         String res_PVR_EpgEvElaTime = result["PVR.EpgEventElapsedTime(hh:mm:ss)"];
-   //    String res_PVR_EpgEvFiTime  = result["PVR.EpgEventFinishTime"];
-         String res_Sys_Date         = result["System.Date"];
-   //    String res_ViPl_ChName      = result["VideoPlayer.ChannelName"];
-   //    String res_ViPl_Title       = result["VideoPlayer.Title"];
-   //    String res_ViPl_Year        = result["VideoPlayer.Year"];
-         String res_ViPl_Cover       = result["VideoPlayer.Cover"];
-   //      String res_ViPl_Dur         = result["VideoPlayer.Time"];
-   //      String res_MuPl_Dur         = result["MusicPlayer.Duration"];
-        
-         Logo_tv = res_ViPl_Cover;
-
-//Serial.println(res_ViPl_Cover);
-//Serial.println(res_PVR_EpgEvDur);       
-//Serial.println(res_PVR_EpgEvElaTime);
-//Serial.println(res_ViPl_Dur);       
-//Serial.println(res_MuPl_Dur);       
-
-/*
-
-//----------------------- int from string ---------------------------------------
- 
-//------  VideoPlayerDuration to int ------
-
-         int Index_v1 = res_ViPl_Dur.indexOf(":");
-         if (Index_v1 != -1)
-           {
-             String S_vdur_time_hod = res_ViPl_Dur.substring(0, Index_v1);
-             String S_vdur_time_min = res_ViPl_Dur.substring(Index_v1 + 1);
-             String S_vdur_time_sec = res_ViPl_Dur.substring(Index_v1 + 4);
-             
-             int vdur_time_hod = S_vdur_time_hod.toInt();
-             int vdur_time_min = S_vdur_time_min.toInt();
-             int vdur_time_sec = S_vdur_time_sec.toInt();
-
-             vdur = (vdur_time_hod*60*60) + (vdur_time_min*60) + vdur_time_sec ;
-
-//Serial.print(vdur_time_hod);
-//Serial.print(" : ");
-//Serial.print(vdur_time_min);
-//Serial.print(" : ");
-//Serial.println(vdur_time_sec);
-//Serial.println(vdur);
-           }
-
-//------  MusikPlayerDuration to int ------
-
-         int Index_m1 = res_MuPl_Dur.indexOf(":");
-         if (Index_m1 != -1)
-           {
-             String S_mdur_time_hod = res_MuPl_Dur.substring(0, Index_m1);
-             String S_mdur_time_min = res_MuPl_Dur.substring(Index_m1 + 1);
-             String S_mdur_time_sec = res_MuPl_Dur.substring(Index_m1 + 4);
-             
-             int mdur_time_hod = S_mdur_time_hod.toInt();
-             int mdur_time_min = S_mdur_time_min.toInt();
-             int mdur_time_sec = S_mdur_time_sec.toInt();
-
-             mdur = (mdur_time_hod*60*60) + (mdur_time_min*60) + mdur_time_sec ;
-
-//Serial.print(mdur_time_hod);
-//Serial.print(" : ");
-//Serial.print(mdur_time_min);
-//Serial.print(" : ");
-//Serial.println(mdur_time_sec);
-//Serial.println(mdur);
-           }
-*/
-             
-//------  PVR_EpgEventDuration to int ------
-
-         int Index_1 = res_PVR_EpgEvDur.indexOf(":");
-         if (Index_1 != -1)
-           {
-             String S_pdur_time_hod = res_PVR_EpgEvDur.substring(0, Index_1);    // search string  h:m:s
-             String S_pdur_time_min = res_PVR_EpgEvDur.substring(Index_1 + 1);
-             String S_pdur_time_sec = res_PVR_EpgEvDur.substring(Index_1 + 4);
-
-             int pdur_time_hod = S_pdur_time_hod.toInt();   // string to int values
-             int pdur_time_min = S_pdur_time_min.toInt();
-             int pdur_time_sec = S_pdur_time_sec.toInt();
-             
-             pdur = (pdur_time_hod*60*60) + (pdur_time_min*60) + pdur_time_sec ; // output to sec
-                     
-//Serial.print(pdur_time_hod);
-//Serial.print(" : ");
-//Serial.print(pdur_time_min);
-//Serial.print(" : ");
-//Serial.println(pdur_time_sec);
-//Serial.println(pdur);
-           }
-           
-//------  PVR_EpgEventElapsedTime to int ------
-
-        int Index_2 = res_PVR_EpgEvElaTime.indexOf(":");
-         if (Index_2 != -1)
-           {
-             String S_pela_time_hod = res_PVR_EpgEvElaTime.substring(0, Index_2);
-             String S_pela_time_min = res_PVR_EpgEvElaTime.substring(Index_2 + 1);
-             String S_pela_time_sec = res_PVR_EpgEvElaTime.substring(Index_2 + 4);
-
-             int pela_time_hod = S_pela_time_hod.toInt();
-             int pela_time_min = S_pela_time_min.toInt();
-             int pela_time_sec = S_pela_time_sec.toInt();
-
-             pela = (pela_time_hod*60*60) + (pela_time_min*60)+ pela_time_sec ;
-                      
-//Serial.print(pela_time_hod);
-//Serial.print(" : ");
-//Serial.print(pela_time_min);
-//Serial.print(" : ");
-//Serial.println(pela_time_sec);
-//Serial.println(pela);
-           }
-        }      
-      delay(1000);
          
-    }
+         bool res_Pl_Audio   = result["Player.HasAudio"];
+         bool res_Pl_Tv      = result["Pvr.IsPlayingTv"];
+         bool res_Pl_Video   = result["VideoPlayer.Content(movies)"];
+         bool res_Pl_IntStr  = result["Player.IsInternetStream"];
+         bool res_Tv_Rec     = result["Pvr.IsRecordingTV"];
 
+//Serial.println(res_Pl_Tv);
+//Serial.println(res_Pl_Audio);
+//Serial.println(res_Pl_Video);
+Serial.println(res_Pl_IntStr);
+Serial.println(res_Tv_Rec);
+//Serial.println("");      
+//---------------------------------------- WEB ---------------------------------
+        if ((WiFi.status() == WL_CONNECTED))
+          {
+            HTTPClient http;
 
-void logo()  //--------------------------- LOGO --------------------------------
-    {
-      setPngPosition(65, 0);
-      load_png(Logo_tv);        
-    }
+            String addr     = ("http://192.168.0.150:8081/jsonrpc?request=");
+            String comm     = ("{%22jsonrpc%22:%222.0%22,%22method%22:%22XBMC.GetInfoLabels%22,%22params%22:{%22labels%22:[");
 
-void ProgBar()  //------------------------ PROGRES BAR -------------------------
-    {
-      web();
-      bar_val = pela;
+            String label_1  = ("%22System.Date%22,"             );
+      //    String label_2  = ("%22VideoPlayer.ChannelName%22," );
+      //    String label_3  = ("%22VideoPlayer.Title%22,"       );          
+      //    String label_4  = ("%22VideoPlayer.Year%22,"        );          
+            String label_5  = ("%22PVR.EpgEventDuration(hh:mm:ss)%22,"    );       
+            String label_6  = ("%22PVR.EpgEventElapsedTime(hh:mm:ss)%22," ); // = "VideoPlayer.Time" and "MusicPlayer.Time"
+      //    String label_7  = ("%22PVR.EpgEventFinishTime%22,"  );          
+            String label_8  = ("%22VideoPlayer.Cover%22"       );
 
+    //      String label_9  = ("%22Player.Time%22,"        );//+#+#+#+#+#+#+#+
 
-//----- Syntax -----
-//-----         map(value  , fromLow, fromHigh, toLow, toHigh); ----
-      bar_val = map(bar_val, 0      , pdur    , 0    , 300   );
+   //       String label_10 = ("%22MusicPlayer.Duration%22,"    );
+   //       String label_11 = ("%22MusicPlayer.Cover%22"        );
 
-//-----              x          Y         x Lonog      y Hihgt
-      tft.fillRect( 10,        210,         320,          15,    BLACK   );
-      tft.drawRect( 10,        210,         300,          15,    CYAN   );
-      tft.fillRect( 10,        210,         bar_val,      15,    CYAN   );
+            String id       = ("]},%22id%22:5}"                 );
+          
+            String link     = addr + comm + label_1 + label_5 + label_6 + label_8 + id ;
 
-//Serial.print("Brogres bar val    ---   ");
-//Serial.println(bar_val);      
-//Serial.println("   |   ");
+            http.begin(link);
+          
+            int httpCode = http.GET();
+            inRaw = http.getString();
+             
+//---- Deserialization + Filter ----  https://arduinojson.org/v6/assistant/#/step1  ----
 
-      delay(1000);
+            StaticJsonDocument<0> filter;
+            filter.set(true);
 
-    }
+            StaticJsonDocument<512> doc;
 
-  bool logo_0    = false;
-//  bool bit_vid   = false;
-//  bool bit_mus   = false;
+            DeserializationError error = deserializeJson(doc, inRaw, DeserializationOption::Filter(filter));
 
-void enable()  //------------------------ Enable BOOL --------------------------
-    {
+            if (error)
+              {
+//Serial.print("deserializeJson() failed: ");
+//Serial.println(error.c_str());
+                return;
+              }
 
-//----- No logo = Black Screan ----
+            JsonObject result = doc["result"];
 
-      if ( pdur    >= 1      )  { logo_0 = true;     }
-      if ( logo_0  == true   )  { logo(); ProgBar(); }
+            String res_PVR_EpgEvDur     = result["PVR.EpgEventDuration(hh:mm:ss)"];
+            String res_PVR_EpgEvElaTime = result["PVR.EpgEventElapsedTime(hh:mm:ss)"];
+      //    String res_PVR_EpgEvFiTime  = result["PVR.EpgEventFinishTime"];
 
-      if ( pdur    <= 0      )  { logo_0 = false;    }          
-      if ( logo_0  == false  )  { tft.fillScreen(0); }
+            String res_Sys_Date         = result["System.Date"];
+
+      //    String res_ViPl_ChName      = result["VideoPlayer.ChannelName"];
+      //    String res_ViPl_Title       = result["VideoPlayer.Title"];
+      //    String res_ViPl_Year        = result["VideoPlayer.Year"];
+            String res_ViPl_Cover       = result["VideoPlayer.Cover"];         
+
+//Serial.println("");
+//Serial.println(res_ViPl_Cover);
+//Serial.println("PDoba trvania PVR            ---   " + res_PVR_EpgEvDur);
+//Serial.println("PUplinuty cas                ---   " + res_PVR_EpgEvElaTime);
+
+//--------------------------  PVR_EpgEventDuration to int ------
+
+            int Index_1 = res_PVR_EpgEvDur.indexOf(":");
+            if (Index_1 != -1)
+              {
+                String S_pdur_time_hod = res_PVR_EpgEvDur.substring(0, Index_1);
+                String S_pdur_time_min = res_PVR_EpgEvDur.substring(Index_1 + 1);
+                String S_pdur_time_sec = res_PVR_EpgEvDur.substring(Index_1 + 4);
+
+                int pdur_time_hod = S_pdur_time_hod.toInt();
+                int pdur_time_min = S_pdur_time_min.toInt();
+                int pdur_time_sec = S_pdur_time_sec.toInt();
+             
+                pdur = (pdur_time_hod*60*60) + (pdur_time_min*60) + pdur_time_sec ;
+
+              }
+           
+//Serial.print("P_dur            ---   ");
+//Serial.println(pdur);                   
+       
+//------------------------  PVR_EpgEventElapsedTime to int ------
+
+            int Index_2 = res_PVR_EpgEvElaTime.indexOf(":");
+            if (Index_2 != -1)
+              {
+                String S_pela_time_hod = res_PVR_EpgEvElaTime.substring(0, Index_2);
+                String S_pela_time_min = res_PVR_EpgEvElaTime.substring(Index_2 + 1);
+                String S_pela_time_sec = res_PVR_EpgEvElaTime.substring(Index_2 + 4);
+
+                int pela_time_hod = S_pela_time_hod.toInt();
+                int pela_time_min = S_pela_time_min.toInt();
+                int pela_time_sec = S_pela_time_sec.toInt();
+
+                pela = (pela_time_hod*60*60) + (pela_time_min*60)+ pela_time_sec ;
+
+           }         
+           
+//Serial.print("P_ela            ---   ");
+//Serial.println(pela);
+
+            if ( progbar == true )
+              {
+                pela = map(pela, 0      , pdur    , 0    , 300   );
+
+                tft.fillRect( 10,        210,         320,          15,    BLACK   );
+                tft.drawRect( 10,        210,         300,          15,    CYAN   );  //0x040301  );
+                tft.fillRect( 10,        210,         pela,      15,    CYAN   );
+              }
+   
+//Serial.println("Progres bar val              ---   " + pela);
+
+            if (bool_tv == true)
+              {
+                setPngPosition(65, 0);
+                load_png(res_ViPl_Cover); 
+                progbar = true;
+              }
+     
+            if (bool_fil == true)
+              {
+                setPngPosition(65, 0);
+                load_png(filmy);
+                tft.fillRect( 10, 210, 320, 15, BLACK   );
+              }     
+ 
+            if (bool_mus == true)  
+              {
+                setPngPosition(65, 0);
+                load_png(hudba);
+                tft.fillRect( 10, 210, 320, 15, BLACK   ); 
+              }
+
+            if (bool_stre == true)  
+              {
+                setPngPosition(65, 0);
+                load_png(stream);
+                tft.fillRect( 10, 210, 320, 15, BLACK   ); 
+              }
+
+            if (res_Tv_Rec == true)
+              {
+                tft.fillRoundRect(275,5, 40, 40, 3, RED);
+                delay(1000);
+                tft.fillRoundRect(275,5, 40, 40, 3, BLACK);
+              }
+
+            if (res_Tv_Rec == false)
+              {
+                tft.fillRoundRect(275,5, 40, 40, 3, BLACK);
+              }
+              
   
-    }
+            if (res_Pl_Tv == true)
+              { bool_stre = false; bool_fil = false; bool_mus = false; bool_tv = true; }      
 
-    
-void loop()  //--------------------------- LOP ---------------------------------
-    {
-      enable();
-      web();
-    }
+          else if (res_Pl_Video == true)
+                 { progbar = false; bool_stre = false; bool_mus = false; bool_tv = false; bool_fil = true; }
+
+             else if ((res_Pl_Audio == true) && (res_Pl_IntStr == false))
+                    { progbar = false; bool_stre = false; bool_tv = false; bool_fil = false; bool_mus = true; }
+
+                else if ((res_Pl_IntStr == true) && (res_Pl_Audio == true))
+                       { progbar = false; bool_tv = false; bool_fil = false; bool_mus = false; bool_stre = true; }
+
+                        if ((res_Pl_Tv == false) && (res_Pl_Video == false) && (res_Pl_Audio == false) && (res_Pl_IntStr == false)) 
+                          { progbar = false; bool_tv = false; bool_fil = false; bool_mus = false; bool_stre = false; tft.fillScreen(0); }
+
+//Serial.println(progbar);
+//Serial.println(bool_tv);
+//Serial.println(bool_fil);
+//Serial.println(bool_mus);
+//Serial.println("");
+
+        }
+        delay(1000);       
+        }
+
+    }  
