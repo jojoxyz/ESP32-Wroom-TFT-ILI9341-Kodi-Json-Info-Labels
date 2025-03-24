@@ -6,3 +6,4 @@ I'm not a pro, but it's functional and if someone doesn't like it, let them modi
 ![DSC_0002_BURST20250324132848281](https://github.com/user-attachments/assets/a63ba8ce-d0a4-495e-9509-8fc8bb3e1ffd)
 ![DSC_0002_BURST20250324132811550](https://github.com/user-attachments/assets/fa52204c-ce6b-46d8-a76f-fa5580068c04)
 ![DSC_0002_BURST20250324132746420](https://github.com/user-attachments/assets/e3b282df-d6d9-4be4-8883-a0eac357ba44)
+![DSC_0002_BURST20250324132830124](https://github.com/user-attachments/assets/c578e11b-c4f5-469f-9d01-e3f39011c50c)
