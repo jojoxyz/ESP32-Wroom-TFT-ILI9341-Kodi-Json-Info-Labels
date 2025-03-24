@@ -49,24 +49,24 @@
 #include <WiFi.h>
 
 
-#define BLACK          0x0000
-#define WHITE          0xFFFF
-#define BLUE           0x001F
-#define RED            0xF800
-#define GREEN          0x07E0
-#define CYAN           0x07FF
-#define MAGENTA        0xF81F
-#define YELLOW         0xFFE0
-#define ORANGE         0xFD20
-#define PINK           0xF81F
+#define BLACK          0x000000
+#define WHITE          0xffffff
+#define BLUE           0x0000ff
+#define RED            0xff0000
+#define GREEN          0x00cc00
+#define CYAN           0x003831
+#define MAGENTA        0x9900cc
+#define YELLOW         0xffff00
+#define ORANGE         0xff8000
+#define PINK           0xff66ff
 
-#define GREENYELLOW    0xAFE5
+#define GREENYELLOW    0xccff33
 
-#define DARK_BLUE      0x021ab8
-#define DARK_RED       0x29b802
-#define DARK_GREEN     0x03E0
-#define DARK_CYAN      0x022fb8
-#define DARK_MAGENTE   0x2b814
+#define DARK_BLUE      0x000080
+#define DARK_RED       0xb30000
+#define DARK_GREEN     0x006600
+#define DARK_CYAN      0x00665a
+#define DARK_MAGENTE   0x4d0066
 
 
 void setup()  //--------------------------- SETUP ------------------------------
